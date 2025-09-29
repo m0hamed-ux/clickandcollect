@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Cafétéria - Click&Collect</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eG6X4G7n3d3n5sUmUu4K7gVf0n4gkOa5FZq9Gm2wA1q7qz1gT3lYQhVg8F6k2sPqYk5mC5Aqv0C6m9J2F9Jgw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha512-o3bqk5n3YvYxWb9E5o2Y0kU9n2mO2/6yJ3l4l1mD9+zv9R9hY0c8f3l1kz8O1G2rQkq8s4r2J9bZ2vRj5nQWcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    // Tailwind config: enable custom container width
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#ff6600',
+            basebg: '#fefaf6',
+            basetext: '#1e1e1e'
+          },
+          boxShadow: {
+            soft: '0 10px 20px rgba(0,0,0,0.07)'
+          },
+          maxWidth: {
+            container: '1200px'
+          },
+          borderRadius: {
+            card: '1rem',
+            pill: '999px'
+          },
+          keyframes: {
+            modal: {
+              '0%': { opacity: '0', transform: 'translateY(8px) scale(0.98)' },
+              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
+            },
+            marquee: {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-50%)' }
+            }
+          },
+          animation: {
+            modal: 'modal .25s ease-out',
+            marquee: 'marquee 18s linear infinite'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Rounded sans-serif font (design: "rounded sans-serif") -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #ff6600;
+      --background: #fefaf6;
+      --text: #1e1e1e;
+    }
+    html, body { color: var(--text); background: var(--background); font-family: 'Nunito', ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Header / Navbar -->
+  <!-- Announcement marquee (icons, infinite scroll) -->
+  <div class="bg-primary text-white text-xs overflow-hidden">
+    <div class="mx-auto max-w-container px-0 py-2">
+      <div class="whitespace-nowrap flex items-center gap-10 animate-marquee will-change-transform" role="status" aria-live="polite">
+        <div class="flex items-center gap-2 pl-6">
+          <!-- clock icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M12 2.25A9.75 9.75 0 1 0 21.75 12 9.762 9.762 0 0 0 12 2.25Zm.75 5.25a.75.75 0 0 0-1.5 0v4.25c0 .2.08.39.22.53l2.5 2.5a.75.75 0 1 0 1.06-1.06l-2.28-2.28V7.5Z" clip-rule="evenodd"/></svg>
+          <span>Commandez avant 11h30 — Retrait à 12h30</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- leaf icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M12 2c5.523 0 10 4.477 10 10v.75A8.25 8.25 0 0 1 13.75 21H13A11 11 0 0 1 2 10V9.25A7.25 7.25 0 0 1 9.25 2H10c.69 0 1.368.062 2 .18V2Z"/></svg>
+          <span>Options veggie disponibles</span>
+        </div>
+        <div class="flex items-center gap-2 pr-6">
+          <!-- tag icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M2.25 12.75v-3.5a2 2 0 0 1 2-2h6.19a2 2 0 0 1 1.414.586l7.06 7.06a2 2 0 0 1 0 2.828l-3.5 3.5a2 2 0 0 1-2.828 0l-7.06-7.06A2 2 0 0 1 2.25 12.75Z"/></svg>
+          <span>Promos du jour et best‑sellers</span>
+        </div>
+        <!-- duplicate for seamless marquee -->
+        <div class="flex items-center gap-2 pl-6">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M12 2.25A9.75 9.75 0 1 0 21.75 12 9.762 9.762 0 0 0 12 2.25Zm.75 5.25a.75.75 0 0 0-1.5 0v4.25c0 .2.08.39.22.53l2.5 2.5a.75.75 0 1 0 1.06-1.06l-2.28-2.28V7.5Z" clip-rule="evenodd"/></svg>
+          <span>Commandez avant 11h30 — Retrait à 12h30</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M12 2c5.523 0 10 4.477 10 10v.75A8.25 8.25 0 0 1 13.75 21H13A11 11 0 0 1 2 10V9.25A7.25 7.25 0 0 1 9.25 2H10c.69 0 1.368.062 2 .18V2Z"/></svg>
+          <span>Options veggie disponibles</span>
+        </div>
+        <div class="flex items-center gap-2 pr-6">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M2.25 12.75v-3.5a2 2 0 0 1 2-2h6.19a2 2 0 0 1 1.414.586l7.06 7.06a2 2 0 0 1 0 2.828l-3.5 3.5a2 2 0 0 1-2.828 0l-7.06-7.06A2 2 0 0 1 2.25 12.75Z"/></svg>
+          <span>Promos du jour et best‑sellers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <header id="siteHeader" class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-black/5 transition-shadow">
+    <nav class="mx-auto max-w-container px-6 py-3 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white font-extrabold">CC</span>
+        <span class="font-extrabold text-lg">Campus Cafétéria</span>
+      </a>
+      <!-- Search + Desktop Menu -->
+      <div class="hidden lg:flex items-center gap-4 flex-1 mx-6">
+        <!-- Search pill -->
+        <label class="relative flex-1">
+          <span class="sr-only">Rechercher dans le menu</span>
+          <input id="searchMenu" type="search" placeholder="Rechercher un plat..." class="w-full rounded-pill bg-black/5 border border-black/10 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/50"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.03 12.17l4.28 4.28a.75.75 0 1 0 1.06-1.06l-4.28-4.28A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/></svg>
+        </label>
+        <ul class="flex items-center gap-1">
+          <li>
+            <a href="#menu" class="nav-link relative px-4 py-2 rounded-pill text-sm/none hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <span>Menu</span>
+              <span class="indicator absolute left-4 right-4 -bottom-[2px] h-[2px] bg-primary rounded-full scale-x-0 origin-left transition-transform"></span>
+            </a>
+          </li>
+          <li>
+            <a href="#commande" class="nav-link relative px-4 py-2 rounded-pill text-sm/none hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <span>Commander</span>
+              <span class="indicator absolute left-4 right-4 -bottom-[2px] h-[2px] bg-primary rounded-full scale-x-0 origin-left transition-transform"></span>
+            </a>
+          </li>
+          <li>
+            <a href="admin.html" class="relative px-4 py-2 rounded-pill text-sm/none hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary/30">Admin</a>
+          </li>
+        </ul>
+      </div>
+      <!-- Fallback menu on medium screens -->
+      <ul class="hidden md:flex lg:hidden items-center gap-1">
+        <li>
+          <a href="#menu" class="nav-link relative px-4 py-2 rounded-pill text-sm/none hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <span>Menu</span>
+            <span class="indicator absolute left-4 right-4 -bottom-[2px] h-[2px] bg-primary rounded-full scale-x-0 origin-left transition-transform"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#commande" class="nav-link relative px-4 py-2 rounded-pill text-sm/none hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <span>Commander</span>
+            <span class="indicator absolute left-4 right-4 -bottom-[2px] h-[2px] bg-primary rounded-full scale-x-0 origin-left transition-transform"></span>
+          </a>
+        </li>
+        <li>
+          <a href="admin.html" class="relative px-4 py-2 rounded-pill text-sm/none hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary/30">Admin</a>
+        </li>
+      </ul>
+      <!-- CTA -->
+      <a href="#commande" class="hidden md:inline-flex items-center gap-2 bg-primary text-white rounded-pill px-5 py-2 shadow-soft hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30 transition">
+        Commander maintenant
+      </a>
+      <!-- Mobile menu button -->
+      <button id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" aria-label="Ouvrir le menu" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-black/10 hover:bg-black/5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M3.75 6.75A.75.75 0 0 1 4.5 6h15a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1-.75-.75Zm0 10.5a.75.75 0 0 1 .75-.75h15a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1-.75-.75Zm0-5.25a.75.75 0 0 1 .75-.75h15a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" /></svg>
+      </button>
+    </nav>
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-black/5 bg-white will-change-transform transition-transform duration-200 ease-out translate-y-[-8px]">
+      <div class="mx-auto max-w-container px-6 py-4 space-y-3">
+        <a href="#menu" class="block py-2">Menu</a>
+        <a href="#commande" class="block py-2">Commander</a>
+        <a href="admin.html" class="block py-2">Admin</a>
+        <a href="#commande" class="inline-flex items-center bg-primary text-white rounded-pill px-5 py-2">Commander maintenant</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <!-- Hero: autoplay background video with overlay content -->
+    <section class="relative overflow-hidden">
+      <!-- Background video -->
+      <video id="heroVideo" class="absolute inset-0 w-full h-full object-cover" poster="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop" autoplay muted loop playsinline preload="metadata">
+        <source src="https://videocdn.cdnpk.net/videos/b6c42b73-2b82-5ec4-8886-aed19ce3ab40/horizontal/previews/watermarked/large.mp4" type="video/mp4" />
+        Votre navigateur ne supporte pas la vidéo HTML5.
+      </video>
+      <!-- Gradient overlay for readability -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-basebg/80"></div>
+      <!-- Controls (top-right) -->
+      <div class="pointer-events-auto absolute right-4 top-4 z-10 flex gap-2">
+        <button id="togglePlay" class="inline-flex items-center rounded-pill px-3 py-1.5 bg-white/90 border border-black/10 text-sm shadow-soft hover:bg-white">Pause</button>
+        <button id="toggleMute" class="inline-flex items-center rounded-pill px-3 py-1.5 bg-white/90 border border-black/10 text-sm shadow-soft hover:bg-white">Son: off</button>
+      </div>
+      <!-- Foreground content -->
+      <div class="relative z-10">
+        <div class="mx-auto max-w-container px-6 py-20 md:py-28">
+          <div class="max-w-3xl mx-auto text-center bg-white/70 backdrop-blur rounded-card border border-white/60 shadow-soft p-6 md:p-10">
+            <div class="mx-auto mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">🍽️</div>
+            <h1 class="text-[clamp(2.2rem,5vw,3.2rem)] font-extrabold leading-tight">Commandez en un clic. Récupérez sans attendre.</h1>
+            <p class="mt-3 text-lg text-black/70">Menu du jour préparé dès le matin. Commandes jusqu'à 11h30. Retrait garanti à 12h30 au comptoir Click&Collect.</p>
+            <div class="mt-5 flex items-center justify-center gap-2 text-xs">
+              <span class="inline-flex items-center rounded-pill bg-white/80 border border-black/10 px-3 py-1">⏰ Ouverture 8h–13h</span>
+              <span class="inline-flex items-center rounded-pill bg-white/80 border border-black/10 px-3 py-1">🥗 Options veggie</span>
+              <span class="inline-flex items-center rounded-pill bg-white/80 border border-black/10 px-3 py-1">⭐ Best-sellers</span>
+            </div>
+            <div class="mt-6 flex items-center justify-center gap-3">
+              <a href="#menu" class="inline-flex items-center bg-primary text-white rounded-pill px-6 py-3 shadow-soft hover:opacity-90 transition">Voir le menu</a>
+              <a href="#commande" class="inline-flex items-center bg-white text-basetext rounded-pill px-6 py-3 border border-black/10 hover:bg-black/5 transition">Commander</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Review / Testimonial section with gradient and image fan -->
+    <section class="review-section relative overflow-hidden py-16">
+      <div class="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent"></div>
+      <div class="relative mx-auto max-w-container px-6 grid lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <p class="quote text-2xl md:text-3xl font-extrabold leading-relaxed text-black/90">“J'adore la cafétéria du campus: on mange bien, vite, et sans stress. Le retrait est super fluide et les options veggie sont excellentes.”</p>
+          <div class="mt-6 flex items-center gap-3">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" alt="Avatar" class="h-10 w-10 rounded-full object-cover shadow" />
+            <div class="text-sm">
+              <div class="font-semibold">Brooklyn Simmons</div>
+              <div class="text-black/60">Etudiante • Foodie</div>
+            </div>
+          </div>
+        </div>
+        <!-- Fan collage -->
+        <div class="relative flex items-center justify-center">
+          <div class="relative h-56 w-72">
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop" alt="wrap" class="review-card absolute inset-0 h-40 w-28 object-cover rounded-xl shadow-soft -rotate-12 -left-6 top-4" />
+            <img src="https://images.unsplash.com/photo-1460306855393-0410f61241c7?q=80&w=800&auto=format&fit=crop" alt="ramen" class="review-card absolute inset-0 h-48 w-32 object-cover rounded-xl shadow-soft rotate-0 left-10 top-0" />
+            <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800&auto=format&fit=crop" alt="coffee" class="review-card absolute inset-0 h-56 w-36 object-cover rounded-xl shadow-soft rotate-12 left-24 top-6" />
+            <span class="absolute left-1/2 -translate-x-1/2 bottom-2 inline-flex items-center gap-2 rounded-pill px-3 py-1 bg-emerald-700 text-white text-xs shadow-soft">Vegan party</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery (A Feast for Your Eyes) -->
+    <section class="mx-auto max-w-container px-6 py-12">
+      <h2 class="text-center text-2xl md:text-3xl font-extrabold">Un régal pour les yeux</h2>
+      <p class="text-center text-black/60 mt-1 max-w-2xl mx-auto">Des couleurs, du croquant, et de la fraîcheur. Voici un aperçu de nos plats du jour.</p>
+      <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format&fit=crop" alt="Burger artisanal" class="h-40 w-full object-cover rounded-xl shadow-soft" />
+        <img src="https://images.unsplash.com/photo-1585238342028-4bbc1a1438a7?q=80&w=800&auto=format&fit=crop" alt="Rouleaux de printemps" class="h-40 w-full object-cover rounded-xl shadow-soft" />
+        <img src="https://images.unsplash.com/photo-1562967916-eb82221dfb36?q=80&w=800&auto=format&fit=crop" alt="Tacos au poulet" class="h-40 w-full object-cover rounded-xl shadow-soft" />
+        <img src="https://images.unsplash.com/photo-1604908554027-411e19b2f93e?q=80&w=800&auto=format&fit=crop" alt="Assiette veggie" class="h-40 w-full object-cover rounded-xl shadow-soft" />
+      </div>
+    </section>
+
+    <!-- Statement section: big centered copy with inline images on dark background -->
+    <section class="statement-section relative overflow-hidden py-16">
+      <!-- Patterned dark bg -->
+      <div class="absolute inset-0 bg-emerald-900"></div>
+      <svg class="absolute inset-0 opacity-10" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 800 400">
+        <defs>
+          <pattern id="waves" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M0 30 Q 15 0 30 30 T 60 30" fill="none" stroke="white" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#waves)" />
+      </svg>
+      <!-- Content -->
+      <div class="relative mx-auto max-w-5xl px-6 text-center text-white">
+        <p class="text-[clamp(1.6rem,4.5vw,2.6rem)] leading-relaxed font-semibold">
+          <span class="chunk">Des entrées </span>
+          <img class="chunk inline-block align-middle h-8 w-8 md:h-10 md:w-10 object-cover rounded" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=200&auto=format&fit=crop" alt="apéro" />
+          <span class="chunk">savoureuses jusqu’aux desserts </span>
+          <img class="chunk inline-block align-middle h-8 w-8 md:h-10 md:w-10 object-cover rounded" src="https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?q=80&w=200&auto=format&fit=crop" alt="dessert" />
+          <span class="chunk">gourmands.</span>
+        </p>
+        <p class="mt-4 text-[clamp(1.2rem,3.5vw,2rem)] leading-relaxed font-medium text-emerald-50">
+          <span class="chunk">Notre menu offre une variété d’options </span>
+          <img class="chunk inline-block align-middle h-8 w-8 md:h-10 md:w-10 object-cover rounded-full" src="https://images.unsplash.com/photo-1533777324565-a040eb52fac1?q=80&w=200&auto=format&fit=crop" alt="plats" />
+          <span class="chunk">pour tous les régimes, préférences et occasions.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Feature section: headline, bullets, CTA, collage -->
+    <section class="feature-section mx-auto max-w-container px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
+      <div class="feature-text">
+        <h2 class="text-[clamp(1.8rem,4vw,2.6rem)] font-extrabold">Mangez mieux, plus vite, au meilleur prix.</h2>
+        <p class="mt-3 text-black/70">Profitez d'offres étudiantes, d'options veggie, et d'un retrait rapide sans file. Commandez en ligne et récupérez à 12h30.</p>
+        <ul class="mt-6 space-y-3 text-black/80">
+          <li class="flex items-start gap-3"><span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">★</span><span>Un menu pour tous les goûts: classique, veggie, spicy.</span></li>
+          <li class="flex items-start gap-3"><span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span><span>Commande en 1 minute. Paiement sécurisé au comptoir.</span></li>
+          <li class="flex items-start gap-3"><span class="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">%</span><span>Promos du jour et best-sellers à prix mini.</span></li>
+        </ul>
+        <div class="mt-6 flex gap-3">
+          <a href="#menu" class="inline-flex items-center bg-primary text-white rounded-pill px-6 py-3 shadow-soft hover:opacity-90">Voir le menu</a>
+          <a href="#commande" class="inline-flex items-center rounded-pill px-6 py-3 border border-black/10 hover:bg-black/5">Commander</a>
+        </div>
+      </div>
+      <!-- Collage -->
+      <div class="relative grid grid-cols-2 gap-4">
+        <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format&fit=crop" alt="Grill" class="rounded-2xl shadow-soft feature-img" />
+        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" alt="Salade" class="rounded-2xl shadow-soft feature-img" />
+        <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=800&auto=format&fit=crop" alt="Pâtes" class="rounded-2xl shadow-soft feature-img col-span-2" />
+        <!-- Sticker badge -->
+        <span class="absolute -right-3 top-6 inline-flex items-center gap-2 rounded-pill px-3 py-1 bg-emerald-700 text-white text-xs shadow-soft">Vegan party</span>
+      </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="mx-auto max-w-container px-6 py-16">
+      <div class="flex items-end justify-between gap-6 mb-8">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-extrabold">Nos plats signature</h2>
+          <p class="text-black/60 mt-1">Classiques du campus et nouveautés, préparés chaque matin. Filtrez et choisissez.</p>
+        </div>
+        <!-- Filters -->
+        <div class="hidden md:flex items-center gap-2">
+          <button data-filter="all" class="filter-btn inline-flex items-center rounded-pill border border-black/10 px-4 py-2 hover:bg-black/5 aria-pressed bg-primary text-white border-primary" aria-pressed="true">Tous</button>
+          <button data-filter="veggie" class="filter-btn inline-flex items-center rounded-pill border border-black/10 px-4 py-2 hover:bg-black/5">Veggie</button>
+          <button data-filter="bestseller" class="filter-btn inline-flex items-center rounded-pill border border-black/10 px-4 py-2 hover:bg-black/5">Best-seller</button>
+        </div>
+      </div>
+
+      <!-- Mobile filters -->
+      <div class="md:hidden flex gap-2 mb-6">
+        <select id="mobileFilter" class="w-full rounded-pill border-black/10 focus:ring-primary focus:border-primary">
+          <option value="all">Tous</option>
+          <option value="veggie">Veggie</option>
+          <option value="bestseller">Best-seller</option>
+        </select>
+      </div>
+
+      <div id="menuGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <article class="menu-card group bg-[#fff1ec] rounded-card overflow-hidden shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg" data-category="bestseller">
+          <img src="https://images.unsplash.com/photo-1589308078054-8323d9522a3b?q=80&w=1600&auto=format&fit=crop" alt="Poke bowl" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">Poke Bowl Saumon</h3>
+              <span class="font-extrabold text-primary">65 DH</span>
+            </div>
+            <p class="text-black/70 mt-1">Riz, saumon frais, avocat, edamame, sauce sésame.</p>
+            <div class="mt-3 flex gap-2">
+              <span class="inline-flex text-[11px] px-2 py-1 rounded-pill bg-primary/10 text-primary">Best-seller</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 2 -->
+        <article class="menu-card group bg-[#ffe9e9] rounded-card overflow-hidden shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg" data-category="veggie">
+          <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=1600&auto=format&fit=crop" alt="Pasta primavera" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">Pâtes Primavera</h3>
+              <span class="font-extrabold text-primary">48 DH</span>
+            </div>
+            <p class="text-black/70 mt-1">Pâtes, légumes de saison, basilic, parmesan.</p>
+            <div class="mt-3 flex gap-2">
+              <span class="inline-flex text-[11px] px-2 py-1 rounded-pill bg-black/5">Veggie</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 3 -->
+        <article class="menu-card group bg-[#ffecf2] rounded-card overflow-hidden shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg" data-category="all">
+          <img src="https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1600&auto=format&fit=crop" alt="Sandwich poulet" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">Sandwich Poulet</h3>
+              <span class="font-extrabold text-primary">35 DH</span>
+            </div>
+            <p class="text-black/70 mt-1">Poulet rôti, salade, tomate, sauce légère.</p>
+            <div class="mt-3 flex gap-2">
+              <span class="inline-flex text-xs px-2 py-1 rounded-pill bg-black/5">Classique</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 4 -->
+        <article class="menu-card group bg-[#f3ebff] rounded-card overflow-hidden shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg" data-category="veggie">
+          <img src="https://images.unsplash.com/photo-1478144592103-25e218a04891?q=80&w=1600&auto=format&fit=crop" alt="Salade quinoa" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">Salade Quinoa</h3>
+              <span class="font-extrabold text-primary">42 DH</span>
+            </div>
+            <p class="text-black/70 mt-1">Quinoa, pois chiches, légumes croquants.</p>
+            <div class="mt-3 flex gap-2">
+              <span class="inline-flex text-[11px] px-2 py-1 rounded-pill bg-black/5">Veggie</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 5 -->
+        <article class="menu-card group bg-[#fff1ec] rounded-card overflow-hidden shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg" data-category="bestseller">
+          <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1600&auto=format&fit=crop" alt="Burger classique" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">Burger Classique</h3>
+              <span class="font-extrabold text-primary">55 DH</span>
+            </div>
+            <p class="text-black/70 mt-1">Bœuf, cheddar, cornichons, sauce maison.</p>
+            <div class="mt-3 flex gap-2">
+              <span class="inline-flex text-[11px] px-2 py-1 rounded-pill bg-primary/10 text-primary">Best-seller</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 6 -->
+        <article class="menu-card group bg-[#ffe9e9] rounded-card overflow-hidden shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg" data-category="all">
+          <img src="https://images.unsplash.com/photo-1498654896293-37aacf113fd9?q=80&w=1600&auto=format&fit=crop" alt="Wrap veggie" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">Wrap Veggie</h3>
+              <span class="font-extrabold text-primary">30 DH</span>
+            </div>
+            <p class="text-black/70 mt-1">Légumes grillés, houmous, roquette.</p>
+            <div class="mt-3 flex gap-2">
+              <span class="inline-flex text-xs px-2 py-1 rounded-pill bg-black/5">Léger</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Order Form -->
+    <section id="commande" class="mx-auto max-w-container px-6 pb-20">
+      <div class="bg-white rounded-card shadow-soft p-6 md:p-8 border border-black/5">
+        <h2 class="text-2xl md:text-3xl font-extrabold">Passer une commande</h2>
+        <p class="text-black/60 mt-1">Complétez le formulaire avant 11h30.</p>
+        <form id="orderForm" class="mt-6 grid md:grid-cols-2 gap-6" aria-describedby="orderHelp">
+          <div>
+            <label for="nom" class="block font-semibold mb-1">Nom</label>
+            <input id="nom" name="nom" type="text" required autocomplete="name" class="w-full rounded-pill border border-black/10 px-4 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          </div>
+          <div>
+            <label for="email" class="block font-semibold mb-1">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="email" class="w-full rounded-pill border border-black/10 px-4 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          </div>
+          <div>
+            <label for="plat" class="block font-semibold mb-1">Plat</label>
+            <select id="plat" name="plat" required class="w-full rounded-pill border border-black/10 px-4 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              <option value="">Sélectionner un plat</option>
+              <option>Poke Bowl Saumon</option>
+              <option>Pâtes Primavera</option>
+              <option>Sandwich Poulet</option>
+              <option>Salade Quinoa</option>
+              <option>Burger Classique</option>
+              <option>Wrap Veggie</option>
+            </select>
+          </div>
+          <div>
+            <label for="boisson" class="block font-semibold mb-1">Boisson</label>
+            <select id="boisson" name="boisson" class="w-full rounded-pill border border-black/10 px-4 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              <option>Eau</option>
+              <option>Soda</option>
+              <option>Jus</option>
+              <option>Café</option>
+              <option>Thé</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label for="commentaire" class="block font-semibold mb-1">Commentaire</label>
+            <textarea id="commentaire" name="commentaire" rows="3" class="w-full rounded-card border border-black/10 px-4 py-3 focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="Allergies, préférences..."></textarea>
+          </div>
+          <p id="orderHelp" class="md:col-span-2 text-sm text-black/60">Votre commande sera prête pour retrait à 12h30.</p>
+          <div class="md:col-span-2 flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center bg-primary text-white rounded-pill px-6 py-3 shadow-soft hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30 transition">Envoyer la commande</button>
+            <a href="confirmation.html" class="text-primary underline hover:no-underline">Voir exemple de confirmation</a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-black/5">
+    <div class="mx-auto max-w-container px-6 py-10 grid md:grid-cols-3 gap-8 text-sm">
+      <div>
+        <h3 class="font-bold mb-3">Campus Cafétéria</h3>
+        <p class="text-black/70">Click&Collect pour simplifier vos déjeuners au campus.</p>
+      </div>
+      <div>
+        <h3 class="font-bold mb-3">Liens</h3>
+        <ul class="space-y-2">
+          <li><a href="#menu" class="hover:text-primary">Menu</a></li>
+          <li><a href="#commande" class="hover:text-primary">Commander</a></li>
+          <li><a href="admin.html" class="hover:text-primary">Admin</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold mb-3">Contact</h3>
+        <ul class="space-y-2">
+          <li>cafeteria@campus.edu</li>
+          <li>+212 5 22 00 00 00</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-black/5 py-4 text-center text-black/60 text-sm">© 2025 Campus Cafétéria. Tous droits réservés.</div>
+  </footer>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="relative mx-auto max-w-lg mt-24 bg-white rounded-card shadow-soft border border-black/10 overflow-hidden animate-modal">
+      <div class="p-6">
+        <h3 id="confirmTitle" class="text-xl font-extrabold">Merci, votre commande a été enregistrée</h3>
+        <p class="mt-2 text-black/70">Retrait à 12h30. Un email de confirmation vous sera envoyé.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="confirmation.html" class="inline-flex items-center bg-primary text-white rounded-pill px-5 py-2">Voir la page de confirmation</a>
+          <button id="closeModal" class="inline-flex items-center rounded-pill px-5 py-2 border border-black/10 hover:bg-black/5">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating CTA (mobile) -->
+  <button id="floatingCta" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 md:hidden hidden bg-primary text-white rounded-pill px-5 py-3 shadow-soft">Commander maintenant</button>
+
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn?.addEventListener('click', () => {
+      const isOpen = !mobileMenu.classList.contains('hidden');
+      if (isOpen) {
+        mobileMenu.classList.add('hidden');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        mobileMenu.classList.remove('hidden');
+        menuBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Nav link hover underline indicator
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('mouseenter', () => link.querySelector('.indicator')?.classList.replace('scale-x-0','scale-x-100'));
+      link.addEventListener('mouseleave', () => link.querySelector('.indicator')?.classList.replace('scale-x-100','scale-x-0'));
+    });
+
+    // Scrollspy for header links
+    const sections = [
+      { id: 'menu', link: document.querySelector('a[href="#menu"].nav-link') },
+      { id: 'commande', link: document.querySelector('a[href="#commande"].nav-link') },
+    ];
+    const activate = (id) => {
+      sections.forEach(s => {
+        const active = s.id === id;
+        const ind = s.link?.querySelector('.indicator');
+        if (active) {
+          s.link?.classList.add('bg-black/5');
+          ind?.classList.remove('scale-x-0');
+          ind?.classList.add('scale-x-100');
+        } else {
+          s.link?.classList.remove('bg-black/5');
+          ind?.classList.add('scale-x-0');
+          ind?.classList.remove('scale-x-100');
+        }
+      });
+    };
+    const spy = () => {
+      let current = null;
+      sections.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.35 && rect.bottom > window.innerHeight * 0.35) {
+          current = s.id;
+        }
+      });
+      if (current) activate(current);
+    };
+    window.addEventListener('scroll', spy, { passive: true });
+    window.addEventListener('load', spy);
+
+    // Filtering logic
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const menuCards = document.querySelectorAll('.menu-card');
+    const mobileFilter = document.getElementById('mobileFilter');
+
+    function setActiveStyles(btn, active) {
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      btn.classList.toggle('bg-primary', active);
+      btn.classList.toggle('text-white', active);
+      btn.classList.toggle('border-primary', active);
+    }
+
+    function applyFilter(filter) {
+      filterButtons.forEach(btn => setActiveStyles(btn, btn.dataset.filter === filter));
+      menuCards.forEach(card => {
+        const cat = card.getAttribute('data-category');
+        if (filter === 'all') {
+          card.classList.remove('hidden');
+        } else {
+          // Show card if its category matches or card is general (all)
+          if (cat === filter) card.classList.remove('hidden'); else card.classList.add('hidden');
+        }
+      });
+    }
+
+    filterButtons.forEach(btn => btn.addEventListener('click', () => applyFilter(btn.dataset.filter)));
+    mobileFilter?.addEventListener('change', (e) => applyFilter(e.target.value));
+
+    // Live search filter (title and description)
+    const searchMenu = document.getElementById('searchMenu');
+    searchMenu?.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      menuCards.forEach(card => {
+        const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+        const desc = card.querySelector('p')?.textContent.toLowerCase() || '';
+        const matches = title.includes(q) || desc.includes(q);
+        card.classList.toggle('hidden', q && !matches);
+      });
+    });
+
+    // Order form submission (client-side demo)
+    const orderForm = document.getElementById('orderForm');
+    const confirmModal = document.getElementById('confirmModal');
+    const closeModal = document.getElementById('closeModal');
+
+    orderForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Basic validation (HTML5 already handles required)
+      confirmModal.classList.remove('hidden');
+    });
+
+    closeModal?.addEventListener('click', () => confirmModal.classList.add('hidden'));
+    confirmModal?.addEventListener('click', (e) => {
+      if (e.target === confirmModal) confirmModal.classList.add('hidden');
+    });
+
+    // Header shadow on scroll for depth
+    const siteHeader = document.getElementById('siteHeader');
+    const onScroll = () => {
+      if (window.scrollY > 2) {
+        siteHeader.classList.add('shadow');
+      } else {
+        siteHeader.classList.remove('shadow');
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Video controls
+    const heroVideo = document.getElementById('heroVideo');
+    const togglePlay = document.getElementById('togglePlay');
+    const toggleMute = document.getElementById('toggleMute');
+    // Try autoplay
+    (async () => { try { await heroVideo.play(); togglePlay.textContent = 'Pause'; } catch { togglePlay.textContent = 'Lire'; } })();
+    togglePlay?.addEventListener('click', async () => {
+      if (heroVideo.paused) {
+        try { await heroVideo.play(); togglePlay.textContent = 'Pause'; } catch {}
+      } else {
+        heroVideo.pause();
+        togglePlay.textContent = 'Lire';
+      }
+    });
+    toggleMute?.addEventListener('click', () => {
+      heroVideo.muted = !heroVideo.muted;
+      toggleMute.textContent = heroVideo.muted ? 'Son: off' : 'Son: on';
+    });
+
+    // Image fallback handler + lazy loading
+    function attachFallback(img) {
+      const fallback = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1200&auto=format&fit=crop';
+      img.addEventListener('error', () => {
+        if (img.dataset.fallbackApplied) return;
+        img.dataset.fallbackApplied = '1';
+        img.src = fallback;
+      }, { once: true });
+      if (!img.loading) img.loading = 'lazy';
+    }
+    document.querySelectorAll('img').forEach(attachFallback);
+
+    // Respect reduced motion
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      // Stop marquee
+      document.querySelectorAll('.animate-marquee').forEach(el => { el.classList.remove('animate-marquee'); el.style.transform = 'none'; });
+    }
+
+    // GSAP animations
+    if (window.gsap && !prefersReduced) {
+      gsap.registerPlugin(ScrollTrigger);
+      // Hero content fade-in (glass card box)
+      gsap.from('section:nth-of-type(1) .bg-white\\/70 > *', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' });
+      // Hero video fade + parallax scale
+      gsap.from('#heroVideo', { opacity: 0, y: 20, duration: 0.6, ease: 'power2.out' });
+      gsap.to('#heroVideo', {
+        scale: 1.02,
+        ease: 'none',
+        scrollTrigger: { trigger: '#heroVideo', start: 'top bottom', end: 'bottom top', scrub: true }
+      });
+      // Gallery images
+      gsap.from('section:nth-of-type(2) img', {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: 'section:nth-of-type(2)', start: 'top 80%' }
+      });
+      // Menu cards stagger
+      gsap.from('#menuGrid > article', {
+        opacity: 0,
+        y: 24,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: '#menu', start: 'top 75%' }
+      });
+
+      // Feature section
+      gsap.from('.feature-section .feature-text > *', {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.08,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: '.feature-section', start: 'top 80%' }
+      });
+      gsap.from('.feature-section .feature-img', {
+        opacity: 0,
+        scale: 0.96,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: '.feature-section', start: 'top 80%' }
+      });
+
+      // Review section
+      gsap.from('.review-section .quote', {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: '.review-section', start: 'top 75%' }
+      });
+      gsap.from('.review-section .review-card', {
+        opacity: 0,
+        y: 24,
+        rotate: (i) => i === 0 ? -12 : (i === 1 ? 0 : 12),
+        duration: 0.6,
+        stagger: 0.12,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: '.review-section', start: 'top 75%' }
+      });
+
+      // Auto play/pause hero video based on scroll visibility
+      ScrollTrigger.create({
+        trigger: '#heroVideo',
+        start: 'top 75%',
+        end: 'bottom 25%',
+        onEnter: () => { try { heroVideo.play(); togglePlay.textContent = 'Pause'; } catch {} },
+        onEnterBack: () => { try { heroVideo.play(); togglePlay.textContent = 'Pause'; } catch {} },
+        onLeave: () => { heroVideo.pause(); togglePlay.textContent = 'Lire'; },
+        onLeaveBack: () => { heroVideo.pause(); togglePlay.textContent = 'Lire'; }
+      });
+    }
+
+    // Floating CTA visibility on scroll
+    const floatingCta = document.getElementById('floatingCta');
+    floatingCta?.addEventListener('click', () => {
+      document.getElementById('commande')?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' });
+    });
+    const toggleCta = () => {
+      if (window.scrollY > window.innerHeight * 0.5) floatingCta?.classList.remove('hidden');
+      else floatingCta?.classList.add('hidden');
+    };
+    window.addEventListener('scroll', toggleCta, { passive: true });
+    window.addEventListener('load', toggleCta);
+  </script>
+</body>
+</html>

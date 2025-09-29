@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Commandes | Campus Cafétéria</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#ff6600', basebg: '#fefaf6', basetext: '#1e1e1e' },
+          maxWidth: { container: '1200px' },
+          borderRadius: { card: '1rem', pill: '999px' },
+          boxShadow: { soft: '0 10px 20px rgba(0,0,0,0.07)' },
+          keyframes: {
+            modal: {
+              '0%': { opacity: '0', transform: 'translateY(8px) scale(0.98)' },
+              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
+            }
+          },
+          animation: {
+            modal: 'modal .25s ease-out'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    html, body { background:#fefaf6; color:#1e1e1e; font-family:'Nunito', ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+  </style>
+  </head>
+  <body class="min-h-screen flex bg-basebg">
+    <!-- Sidebar -->
+    <aside class="hidden md:flex w-60 flex-col gap-2 bg-[#0f172a] text-white p-4">
+      <a href="index.html" class="flex items-center gap-2 mb-4">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white font-extrabold">CC</span>
+        <span class="font-extrabold">Back-office</span>
+      </a>
+      <nav class="text-sm space-y-1">
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/10" href="#">Tableau</a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white text-black" href="#">Commandes</a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10" href="#">Produits</a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10" href="#">Rapports</a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10" href="#">Paramètres</a>
+      </nav>
+      <div class="mt-auto">
+        <button id="logoutBtn" class="w-full inline-flex items-center justify-center rounded-pill px-4 py-2 bg-white/10 hover:bg-white/20 text-sm">Se déconnecter</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Header -->
+      <header id="siteHeader" class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-black/5">
+        <div class="px-6 py-3 flex items-center justify-between">
+          <div>
+            <h1 class="text-xl md:text-2xl font-extrabold">Commandes</h1>
+            <p class="text-black/60 text-sm">Consultez, filtrez et mettez à jour les statuts.</p>
+          </div>
+          <button id="saveBtn" class="inline-flex items-center bg-primary text-white rounded-pill px-5 py-2 shadow-soft hover:opacity-90">Enregistrer</button>
+        </div>
+      </header>
+
+      <!-- Content grid -->
+      <main class="flex-1 px-4 md:px-6 py-6">
+        <div class="grid lg:grid-cols-3 gap-4">
+          <!-- Orders list card -->
+          <section class="lg:col-span-2 bg-white rounded-card shadow-soft border border-black/5 overflow-hidden">
+            <!-- Toolbar -->
+            <div class="p-4 flex flex-wrap items-center gap-3">
+              <label class="text-sm">Statut</label>
+              <select id="statusFilter" class="rounded-pill border-black/10 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                <option value="all">Tous</option>
+                <option value="en attente">En attente</option>
+                <option value="validée">Validée</option>
+                <option value="servie">Servie</option>
+              </select>
+            </div>
+            <!-- Table -->
+            <div class="overflow-x-auto border-t border-black/5" role="region" aria-label="Table des commandes">
+              <table class="min-w-full text-left align-middle">
+                <thead class="bg-white/80 backdrop-blur text-sm sticky top-0 z-10 border-b border-black/5">
+                  <tr>
+                    <th class="px-4 py-3 w-12"></th>
+                    <th class="px-4 py-3">Commande</th>
+                    <th class="px-4 py-3">Client</th>
+                    <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3">Total</th>
+                    <th class="px-4 py-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersBody" class="divide-y divide-black/5 text-sm">
+                  <tr class="order-row odd:bg-white even:bg-basebg hover:bg-black/5 transition-colors cursor-pointer" data-id="101" data-status="en attente">
+                    <td class="px-4 py-3"><input type="checkbox" class="rounded" /></td>
+                    <td class="px-4 py-3 font-medium whitespace-nowrap">#101</td>
+                    <td class="px-4 py-3">Sara El Amrani</td>
+                    <td class="px-4 py-3"><span class="inline-flex items-center rounded-pill px-2 py-0.5 bg-amber-100 text-amber-800">En attente</span></td>
+                    <td class="px-4 py-3 whitespace-nowrap">65 DH</td>
+                    <td class="px-4 py-3 whitespace-nowrap">Sept 25, 10:15</td>
+                  </tr>
+                  <tr class="order-row odd:bg-white even:bg-basebg hover:bg-black/5 transition-colors cursor-pointer" data-id="102" data-status="validée">
+                    <td class="px-4 py-3"><input type="checkbox" class="rounded" /></td>
+                    <td class="px-4 py-3 font-medium whitespace-nowrap">#102</td>
+                    <td class="px-4 py-3">Yassine B.</td>
+                    <td class="px-4 py-3"><span class="inline-flex items-center rounded-pill px-2 py-0.5 bg-emerald-100 text-emerald-800">Validée</span></td>
+                    <td class="px-4 py-3 whitespace-nowrap">35 DH</td>
+                    <td class="px-4 py-3 whitespace-nowrap">Sept 25, 10:40</td>
+                  </tr>
+                  <tr class="order-row odd:bg-white even:bg-basebg hover:bg-black/5 transition-colors cursor-pointer" data-id="103" data-status="servie">
+                    <td class="px-4 py-3"><input type="checkbox" class="rounded" /></td>
+                    <td class="px-4 py-3 font-medium whitespace-nowrap">#103</td>
+                    <td class="px-4 py-3">Imane K.</td>
+                    <td class="px-4 py-3"><span class="inline-flex items-center rounded-pill px-2 py-0.5 bg-sky-100 text-sky-800">Servie</span></td>
+                    <td class="px-4 py-3 whitespace-nowrap">42 DH</td>
+                    <td class="px-4 py-3 whitespace-nowrap">Sept 25, 11:00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Details panel -->
+          <aside id="detailsPanel" class="bg-white rounded-card shadow-soft border border-black/5 p-4 flex flex-col gap-4 min-h-[400px]">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-xs inline-flex items-center rounded-pill px-2 py-0.5 bg-amber-100 text-amber-800" id="detailStatus">En attente</div>
+                <h2 class="text-lg font-extrabold mt-2" id="detailTitle">Commande #101</h2>
+                <div class="text-sm text-black/60" id="detailDate">Sept 25, 10:15</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-card border border-black/5">
+              <div class="h-12 w-12 rounded-full bg-primary/10 text-primary inline-flex items-center justify-center font-bold">SE</div>
+              <div>
+                <div class="font-semibold" id="detailCustomer">Sara El Amrani</div>
+                <div class="text-sm text-black/60" id="detailEmail">sara.amrani@example.com</div>
+              </div>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-2">Eléments</h3>
+              <ul id="detailItems" class="space-y-2 text-sm">
+                <li class="flex items-center justify-between"><span>Poke Bowl Saumon</span><span class="font-semibold">65 DH</span></li>
+              </ul>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-semibold mb-1">Statut</label>
+                <select id="detailStatusSelect" class="w-full rounded-pill border border-black/10 px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                  <option value="en attente">En attente</option>
+                  <option value="validée">Validée</option>
+                  <option value="servie">Servie</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-1">Commentaire</label>
+                <input id="detailNote" type="text" class="w-full rounded-pill border border-black/10 px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="Note interne" />
+              </div>
+            </div>
+            <div class="mt-auto">
+              <div class="flex items-center justify-between text-sm py-2 border-t border-black/5">
+                <span>Total</span><span id="detailTotal" class="font-extrabold">65 DH</span>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <button class="inline-flex items-center justify-center flex-1 rounded-pill border border-black/10 px-4 py-2 hover:bg-black/5" id="trackBtn">Suivre</button>
+                <button class="inline-flex items-center justify-center flex-1 rounded-pill bg-primary text-white px-4 py-2" id="refundBtn">Rembourser</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="mt-6 text-sm text-black/60">
+          Prototype: données simulées côté client. Le bouton « Enregistrer » affiche un payload d'exemple dans la console.
+        </div>
+      </main>
+    </div>
+
+  <!-- Simple simulated login gate -->
+  <div id="loginGate" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+    <div class="bg-white rounded-card shadow-soft border border-black/10 w-[min(92vw,420px)] animate-modal">
+      <div class="p-6">
+        <h2 class="text-xl font-extrabold">Connexion Admin</h2>
+        <p class="text-black/60 mt-1 text-sm">Accès restreint. Saisissez le mot de passe admin pour continuer.</p>
+        <form id="loginForm" class="mt-4 space-y-3">
+          <div>
+            <label for="adminPass" class="block text-sm font-semibold mb-1">Mot de passe</label>
+            <input id="adminPass" type="password" class="w-full rounded-pill border border-black/10 px-4 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="••••••" required />
+          </div>
+          <div class="flex items-center gap-3 pt-2">
+            <button type="submit" class="inline-flex items-center bg-primary text-white rounded-pill px-5 py-2">Se connecter</button>
+            <a href="index.html" class="text-sm text-black/60 hover:text-primary">Retour au site</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div class="bg-white border border-black/10 shadow-soft rounded-pill px-4 py-2 text-sm flex items-center gap-2 animate-modal">
+      <div class="h-2 w-2 rounded-full bg-primary"></div>
+      <span>Modifications enregistrées</span>
+    </div>
+  </div>
+
+  <footer class="border-t border-black/5 py-6 text-center text-sm text-black/60">
+    © 2025 Campus Cafétéria
+  </footer>
+
+  <script>
+    // Simple admin gate (simulé). Use localStorage flag.
+    const loginGate = document.getElementById('loginGate');
+    const loginForm = document.getElementById('loginForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function ensureAdmin() {
+      const authed = localStorage.getItem('cafeteria_admin') === '1';
+      if (!authed) {
+        loginGate.classList.remove('hidden');
+        loginGate.classList.add('flex');
+      } else {
+        loginGate.classList.add('hidden');
+        loginGate.classList.remove('flex');
+      }
+    }
+
+    ensureAdmin();
+
+    loginForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pass = document.getElementById('adminPass').value;
+      // Demo password: admin
+      if (pass === 'admin') {
+        localStorage.setItem('cafeteria_admin', '1');
+        ensureAdmin();
+      } else {
+        alert('Mot de passe incorrect');
+      }
+    });
+
+    logoutBtn?.addEventListener('click', () => {
+      localStorage.removeItem('cafeteria_admin');
+      ensureAdmin();
+    });
+
+    // Filter by status
+    const statusFilter = document.getElementById('statusFilter');
+    const rows = () => Array.from(document.querySelectorAll('#ordersBody .order-row'));
+
+    statusFilter?.addEventListener('change', () => {
+      const value = statusFilter.value;
+      rows().forEach(r => {
+        const st = r.getAttribute('data-status');
+        if (value === 'all' || st === value) r.classList.remove('hidden');
+        else r.classList.add('hidden');
+      });
+    });
+
+    // Save demo: collect updates
+    const saveBtn = document.getElementById('saveBtn');
+    const toast = document.getElementById('toast');
+
+    saveBtn?.addEventListener('click', () => {
+      const payload = rows().map(r => ({ id: r.getAttribute('data-id'), statut: r.getAttribute('data-status') }));
+      // Example: Here you would POST to your API
+      // fetch('/api/commandes/bulk-update', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+      console.log('Payload to save:', payload);
+      // Show toast
+      toast.classList.remove('hidden');
+      // re-trigger animation
+      const inner = toast.firstElementChild;
+      inner?.classList.remove('animate-modal');
+      void inner?.offsetWidth;
+      inner?.classList.add('animate-modal');
+      setTimeout(() => toast.classList.add('hidden'), 2000);
+    });
+
+    // Header shadow on scroll for depth
+    const siteHeader = document.getElementById('siteHeader');
+    const onScroll = () => {
+      if (window.scrollY > 2) {
+        siteHeader.classList.add('shadow');
+      } else {
+        siteHeader.classList.remove('shadow');
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Row selection -> details
+    const details = {
+      status: document.getElementById('detailStatus'),
+      title: document.getElementById('detailTitle'),
+      date: document.getElementById('detailDate'),
+      customer: document.getElementById('detailCustomer'),
+      email: document.getElementById('detailEmail'),
+      items: document.getElementById('detailItems'),
+      total: document.getElementById('detailTotal'),
+      statusSelect: document.getElementById('detailStatusSelect'),
+      note: document.getElementById('detailNote'),
+    };
+
+    const mockData = {
+      '101': { id: 101, customer: 'Sara El Amrani', email: 'sara.amrani@example.com', status: 'en attente', date: 'Sept 25, 10:15', items: [{ name: 'Poke Bowl Saumon', price: '65 DH' }], total: '65 DH' },
+      '102': { id: 102, customer: 'Yassine B.', email: 'yassine.b@example.com', status: 'validée', date: 'Sept 25, 10:40', items: [{ name: 'Burger Classique', price: '35 DH' }], total: '35 DH' },
+      '103': { id: 103, customer: 'Imane K.', email: 'imane.k@example.com', status: 'servie', date: 'Sept 25, 11:00', items: [{ name: 'Salade Quinoa', price: '42 DH' }], total: '42 DH' },
+    };
+
+    function badgeClasses(status) {
+      if (status === 'validée') return 'bg-emerald-100 text-emerald-800';
+      if (status === 'servie') return 'bg-sky-100 text-sky-800';
+      return 'bg-amber-100 text-amber-800';
+    }
+
+    function selectRow(row) {
+      rows().forEach(r => r.classList.remove('ring-2', 'ring-primary'));
+      row.classList.add('ring-2', 'ring-primary');
+      const id = row.getAttribute('data-id');
+      const data = mockData[id];
+      if (!data) return;
+      details.status.className = 'text-xs inline-flex items-center rounded-pill px-2 py-0.5 ' + badgeClasses(data.status);
+      details.status.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+      details.title.textContent = `Commande #${data.id}`;
+      details.date.textContent = data.date;
+      details.customer.textContent = data.customer;
+      details.email.textContent = data.email;
+      details.items.innerHTML = data.items.map(i => `<li class="flex items-center justify-between"><span>${i.name}</span><span class="font-semibold">${i.price}</span></li>`).join('');
+      details.total.textContent = data.total;
+      details.statusSelect.value = data.status;
+      details.statusSelect.onchange = () => {
+        // update table badge and dataset
+        data.status = details.statusSelect.value;
+        row.setAttribute('data-status', data.status);
+        const badge = row.querySelector('td:nth-child(4) span');
+        badge.className = 'inline-flex items-center rounded-pill px-2 py-0.5 ' + badgeClasses(data.status);
+        badge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+        // reflect in details status badge
+        details.status.className = 'text-xs inline-flex items-center rounded-pill px-2 py-0.5 ' + badgeClasses(data.status);
+        details.status.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+      };
+    }
+
+    rows().forEach(r => r.addEventListener('click', () => selectRow(r)));
+    // Initialize with first row
+    const firstRow = rows()[0];
+    if (firstRow) selectRow(firstRow);
+  </script>
+</body>
+</html>

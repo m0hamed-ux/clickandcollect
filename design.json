@@ -1,0 +1,110 @@
+{
+  "designSystem": {
+    "theme": {
+      "colors": {
+        "primary": "#ff6600",
+        "secondary": "#ffffff",
+        "background": "#fefaf6",
+        "text": "#1e1e1e",
+        "cardVariants": ["#ffe9e9", "#ffecf2", "#fff1ec", "#f3ebff"]
+      },
+      "typography": {
+        "heading": {
+          "fontFamily": "rounded sans-serif",
+          "fontWeight": "bold",
+          "fontSize": "clamp(2rem, 5vw, 3rem)"
+        },
+        "body": {
+          "fontFamily": "rounded sans-serif",
+          "fontWeight": "regular",
+          "fontSize": "1rem"
+        }
+      },
+      "buttons": {
+        "borderRadius": "999px",
+        "padding": "0.75rem 1.5rem",
+        "primary": {
+          "backgroundColor": "#ff6600",
+          "textColor": "#ffffff"
+        },
+        "secondary": {
+          "backgroundColor": "#ffffff",
+          "textColor": "#1e1e1e",
+          "border": "1px solid #1e1e1e"
+        }
+      },
+      "spacing": {
+        "sectionPadding": "4rem",
+        "cardGap": "2rem",
+        "gridGap": "1.5rem"
+      },
+      "borderRadius": {
+        "card": "1rem",
+        "button": "999px"
+      }
+    },
+    "components": {
+      "header": {
+        "type": "navigation",
+        "layout": "horizontal",
+        "elements": ["logo", "navMenu", "ctaButton"]
+      },
+      "hero": {
+        "type": "section",
+        "layout": "two-column",
+        "elements": ["heading", "subtext", "button", "media (image/video with overlay)"]
+      },
+      "menuShowcase": {
+        "type": "cardGrid",
+        "filterable": true,
+        "cardStyle": "imageTop",
+        "elements": ["cardImage", "cardTitle", "cardButton"]
+      },
+      "gallery": {
+        "type": "imageCarousel",
+        "layout": "horizontalScroll",
+        "imageStyle": "rounded"
+      },
+      "testimonials": {
+        "type": "multiCard",
+        "cardStyle": "quoteCard",
+        "variation": "colorBackground",
+        "elements": ["stars", "quoteText", "userInfo"]
+      },
+      "ctaBanner": {
+        "type": "callToAction",
+        "layout": "centered",
+        "elements": ["title", "description", "button"]
+      },
+      "footer": {
+        "type": "multiColumn",
+        "columns": 3,
+        "elements": ["navLinks", "socialLinks", "contactInfo"],
+        "footerNote": true
+      }
+    },
+    "layoutSystem": {
+      "maxWidth": "1200px",
+      "gridColumns": 12,
+      "containerPadding": "1.5rem",
+      "responsiveBreakpoints": {
+        "mobile": "0px",
+        "tablet": "768px",
+        "desktop": "1024px"
+      }
+    },
+    "media": {
+      "imageStyle": "rounded-corner",
+      "videoOverlayPlayButton": true,
+      "hoverEffects": {
+        "scale": true,
+        "shadow": true
+      }
+    },
+    "iconography": {
+      "style": "flat",
+      "theme": "outlined",
+      "size": "medium"
+    }
+  }
+}
